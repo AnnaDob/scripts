@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export ARM_SUBSCRIPTION_ID="XXX"
+export ARM_CLIENT_ID="XXX"
+export ARM_TENANT_ID="XXX"
+export ARM_CLIENT_SECRET="XXX"
