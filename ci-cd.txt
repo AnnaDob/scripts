@@ -1,0 +1,44 @@
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+  imageName: 'devsuperappregistry.azurecr.io/container_for_image:$(Build.BuildId)'
+  group: for_pipeline
+
+stages:
+- stage: Build_and_Push
+  displayName: Build and Push to container
+  jobs:
+  - job: Add
+    steps:
+    - task: Docker@2
+      displayName: Build and Push to container
+      inputs:
+        containerRegistry: 'devsuperappregistry'
+        repository: 'container_for_image'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(tag)
+
+- stage: Deploy
+  displayName: Container Deploy to Azure Web App
+  jobs:
+  - job: Deploy
+    steps:
+    - task: AzureKeyVault@2
+      inputs:
+        azureSubscription: 'Key_vault'
+        KeyVaultName: 'devmainkeyvault'
+        SecretsFilter: '*'
+        RunAsPreJob: true
+    - task: AzureWebAppContainer@1
+      displayName: Azure Web App on Container Deploy
+      inputs:
+        appName: $(app-service-name)
+        azureSubscription: $(azureSubscription)
+        imageName: $(imageName)
